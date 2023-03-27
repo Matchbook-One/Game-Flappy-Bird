@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES6",
+    "sourceMap": true,
+    "types": ["node"],
+    "lib": ["ES6", "DOM"],
+    "rootDir": "resources/js",
+    "esModuleInterop": true,
+    "moduleResolution": "node"
+  }
+}
