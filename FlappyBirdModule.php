@@ -38,7 +38,7 @@ class FlappyBirdModule extends GameModule
    */
   public function getConfigUrl(): string
   {
-    return Url::to(['/flappybird/admin']);
+    return Url::to(['/flappy-bird/admin']);
   }
 
   /**

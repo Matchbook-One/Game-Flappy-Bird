@@ -27,15 +27,15 @@ class Events
   {
     $config = [
       'label'     => 'Flappy Bird',
-      'url'       => Url::to(['/flappybird/admin']),
+      'url'       => Url::to(['/flappy-bird/admin']),
       'group'     => 'manage',
       'icon'      => '<i class="fa fa-crow"></i>',
       'isActive'  => (Yii::$app->controller->module &&
-                      Yii::$app->controller->module->id === 'flappybird' &&
+                      Yii::$app->controller->module->id === 'flappy-bird' &&
                       Yii::$app->controller->id === 'admin'),
       'sortOrder' => 99999,
     ];
-    $event->sender->addItem($config);
+    //$event->sender->addItem($config);
   }
 
   /**
@@ -50,10 +50,10 @@ class Events
     $config = [
       'label'     => 'Flappy Bird',
       'icon'      => '<i class="fa fa-crow"></i>',
-      'url'       => Url::to(['/flappybird/index']),
+      'url'       => Url::to(['/flappy-bird/index']),
       'sortOrder' => 99999,
       'isActive'  => (Yii::$app->controller->module &&
-                      Yii::$app->controller->module->id === 'flappybird' &&
+                      Yii::$app->controller->module->id === 'flappy-bird' &&
                       Yii::$app->controller->id === 'index'),
     ];
     $event->sender->addItem($config);

@@ -1,6 +1,10 @@
 {
   "name": "flappy-bird",
   "version": "1.0.0",
+  "scripts": {
+    "build": "tsc --build",
+    "scss": "scss resources/scss/flappybird.scss:resources/css/flappybird.css"
+  },
   "dependencies": {
     "p5": "^1.6.0"
   },
