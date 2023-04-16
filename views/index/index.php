@@ -2,14 +2,23 @@
 /**
  * @package FlappyBird
  * @author  Christian Seiler <christian@christianseiler.ch>
- * @var View $this
+ * @var \humhub\modules\ui\view\components\View $this
  */
 
-use fhnw\modules\games\flappybird\assets\Assets;
-use yii\web\View;
+use fhnw\modules\games\flappybird\assets\CreateJSAssets;
+use fhnw\modules\games\flappybird\assets\FlappyBirdAssets;
 
-Assets::register($this);
+CreateJSAssets::register($this);
+FlappyBirdAssets::register($this);
 
-$this->registerJsConfig('flappy-bird', []);
+$assetModule = Yii::$app->getModule('flappy-bird');
+
 $this->registerCss('flappy-bird');
+$this->registerJsConfig('flappy-bird', [
+  'assetUrl' => $assetModule->getAssetsUrl()
+]);
+?>
 
+<div class="container">
+  <canvas id="game" width="768" height="1024"></canvas>
+</div>
