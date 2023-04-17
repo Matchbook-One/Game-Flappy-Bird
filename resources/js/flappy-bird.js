@@ -189,7 +189,6 @@ humhub.module('flappy-bird', (module, req, $) => {
     return new createjs.Shape(graphic)
   }
 
-
   function handleComplete() {
     stage.addChild(createBackground())
     ground = createGround()
@@ -204,7 +203,7 @@ humhub.module('flappy-bird', (module, req, $) => {
     stage.addChild(createFill(false))
 
     counter = createText(config.count, false, '#000000', 1, '86px')
-    highScore = createText(config.highScore, false, '#000000', 0, '60px')
+    highScore = createText(config.highscore, false, '#000000', 0, '60px')
     stage.addChild(counter)
 
     createjs.Ticker.timingMode = createjs.Ticker.RAF
@@ -276,7 +275,7 @@ humhub.module('flappy-bird', (module, req, $) => {
 
   function restart() {
     $('canvas').trigger('gameRestart')
-
+    config.count = 0
     pipes.removeAllChildren()
     createjs.Tween
             .get(start)
@@ -310,10 +309,10 @@ humhub.module('flappy-bird', (module, req, $) => {
     config.isDead = true
     bird.gotoAndPlay('dive')
 
-    if (config.count > config.highScore) {
-      config.highScore = config.count
+    if (config.count > config.highscore) {
+      config.highscore = config.count
     }
-    highScore.text = config.highScore
+    highScore.text = config.highscore
     createjs.Tween.removeTweens(bird)
     createjs.Tween
             .get(bird)

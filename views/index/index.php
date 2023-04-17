@@ -14,12 +14,15 @@ FlappyBirdAssets::register($this);
 /** @var \fhnw\modules\games\flappybird\FlappyBirdModule $module */
 $module = Yii::$app->getModule('flappy-bird');
 $game = $module->getGame();
+$highscore = $game->getHighscore();
+$score = $highscore ? $highscore->score : 0;
+
 $this->registerCss('flappy-bird');
 
 $this->registerJsConfig('flappy-bird', [
   'assetUrl'  => $module->getAssetsUrl(),
   'user'      => Yii::$app->user->id,
-  'highscore' => $game->getHighscore()->score
+  'highscore' => $score
 ]);
 ?>
 
