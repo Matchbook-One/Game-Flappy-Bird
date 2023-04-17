@@ -11,11 +11,15 @@ use fhnw\modules\games\flappybird\assets\FlappyBirdAssets;
 CreateJSAssets::register($this);
 FlappyBirdAssets::register($this);
 
-$assetModule = Yii::$app->getModule('flappy-bird');
-
+/** @var \fhnw\modules\games\flappybird\FlappyBirdModule $module */
+$module = Yii::$app->getModule('flappy-bird');
+$game = $module->getGame();
 $this->registerCss('flappy-bird');
+
 $this->registerJsConfig('flappy-bird', [
-  'assetUrl' => $assetModule->getAssetsUrl()
+  'assetUrl'  => $module->getAssetsUrl(),
+  'user'      => Yii::$app->user->id,
+  'highscore' => $game->getHighscore()->score
 ]);
 ?>
 

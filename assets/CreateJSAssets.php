@@ -2,6 +2,7 @@
 
 namespace fhnw\modules\games\flappybird\assets;
 
+use fhnw\modules\gamecenter\assets\GameCenterAssets;
 use humhub\components\assets\AssetBundle;
 use yii\web\View;
 
@@ -34,4 +35,8 @@ class CreateJSAssets extends AssetBundle
    *                      This property will only have an affect if the publishOption is not already set explicitly.
    */
   public $jsPosition = View::POS_HEAD;
+
+  public $depends = [
+    GameCenterAssets::class
+  ];
 }

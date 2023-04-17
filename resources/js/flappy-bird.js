@@ -1,58 +1,85 @@
 /** @namespace humhub */
 humhub.module('flappy-bird', (module, req, $) => {
+  const gamecenter = req('gamecenter')
+
   const event = req('event')
-  event.on('humhub:ready', function () {
+  event.on('humhub:ready', () => {
     $('canvas').trigger('gameEnd')
   })
 
-  const assetUrl = module.config.assetUrl
+  /**
+   * @typedef {object} Point
+   * @property {number} x
+   * @property {number} y
+   *
+   * @typedef {object} Size
+   * @property {number} width
+   * @property {number} height
+   *
+
+   */
+
+  /** @type {number} */
+  const masterPipeDelay = 1.5
+  /** @type {string} */
+  const KEYCODE_SPACE = 'Space'
+
+  /**
+   * @typedef {object} Config
+   * @property {number} wiggle
+   * @property {number} rotation
+   * @property {number} count
+   * @property {number} jumpHeight
+   * @property {number} jumpTime
+   * @property {number} rd
+   * @property {boolean} isStarted
+   * @property {boolean} restartable
+   * @property {boolean} counterShow
+   * @property {boolean} isDead
+   * @property {Point} start
+   * @property {Size} dimension
+   * @property {number} pipeDelay
+   * @property {string} token
+   */
+  const config = {
+    ...module.config,
+    wiggle: 18,
+    count: 0,
+    rotation: undefined,
+    isStarted: false,
+    jumpHeight: 120,
+    jumpTime: 266,
+    isDead: false,
+    start: { x: undefined, y: undefined },
+    dimension: { width: undefined, height: undefined },
+    pipeDelay: masterPipeDelay,
+    restartable: false,
+    rd: 0,
+    counterShow: false,
+    token: undefined
+  }
 
   /** @type {createjs.Stage} */
   let stage
   /** @type {createjs.LoadQueue} */
   let loader
-  /** @type {number} */
-  let startX
-  /** @type {number} */
-  let startY
-  /** @type {number} */
-  const wiggleDelta = 18
-  let count = 0
-
   /** @type {createjs.Sprite} */
   let bird
   /** @type {createjs.Shape} */
   let ground
   /** @type {createjs.Container} */
   let pipes
-  /** @type {number} */
-  let rotationDelta
   /** @type {createjs.Text} */
   let counter
   /** @type {createjs.Text} */
   let highScore
-  /** @type {createjs.Text} */
-  let token
   /** @type {createjs.Bitmap} */
   let start
   /** @type {createjs.Bitmap} */
   let share
   /** @type {createjs.Bitmap} */
   let score
-  /** @type {{width: number, height: number}} */
-  const dimensions = { width: 0, height: 0 }
 
-  let started = false
-  const jumpAmount = 120
-  const jumpTime = 266
-  let dead = false
-  const KEYCODE_SPACE = 'Space'
-
-  const masterPipeDelay = 1.5
-  let pipeDelay = masterPipeDelay
-  let restartable = false
-  let rd = 0
-  let counterShow = false
 
   /**
    *
@@ -63,8 +90,8 @@ humhub.module('flappy-bird', (module, req, $) => {
     const canvas = $('#game')[0]
     stage = new createjs.Stage(canvas)
     createjs.Touch.enable(stage)
-    dimensions.width = stage.canvas.width
-    dimensions.height = stage.canvas.height
+    config.dimension.width = stage.canvas.width
+    config.dimension.height = stage.canvas.height
     const manifest = [
       ...['bird', 'background', 'ground', 'pipe', 'start', 'score', 'share'].map(pngAsset)
       /*,
@@ -84,7 +111,7 @@ humhub.module('flappy-bird', (module, req, $) => {
    * @returns {{src: string, id: string}}
    */
   function pngAsset(id) {
-    return { src: `${assetUrl}/${id}.png`, id }
+    return { src: `${config.assetUrl}/${id}.png`, id }
   }
 
   /**
@@ -95,7 +122,7 @@ humhub.module('flappy-bird', (module, req, $) => {
     const background = new createjs.Shape()
     background.graphics
               .beginBitmapFill(image)
-              .drawRect(0, 0, dimensions.width, dimensions.height)
+              .drawRect(0, 0, config.dimension.width, config.dimension.height)
 
     return background
   }
@@ -107,9 +134,9 @@ humhub.module('flappy-bird', (module, req, $) => {
     const image = loader.getResult('ground')
     const ground = new createjs.Shape()
     ground.graphics.beginBitmapFill(image)
-          .drawRect(0, 0, dimensions.width + image.width, image.height)
+          .drawRect(0, 0, config.dimension.width + image.width, image.height)
     ground.tileW = image.width
-    ground.y = dimensions.height - image.height
+    ground.y = config.dimension.height - image.height
 
     return ground
   }
@@ -118,7 +145,7 @@ humhub.module('flappy-bird', (module, req, $) => {
    * @returns {createjs.Sprite}
    */
   function createBird() {
-    const config = {
+    const spriteConfig = {
       images: [loader.getResult('bird')],
       frames: {
         width: 92,
@@ -132,18 +159,18 @@ humhub.module('flappy-bird', (module, req, $) => {
         dive: [1, 1, 'dive', 1]
       }
     }
-    const data = new createjs.SpriteSheet(config)
-    startX = (dimensions.width - config.frames.width) / 2
-    startY = dimensions.height / 2
+    const data = new createjs.SpriteSheet(spriteConfig)
+    config.start.x = (config.dimension.width - spriteConfig.frames.width) / 2
+    config.start.y = config.dimension.height / 2
 
 
     const bird = new createjs.Sprite(data, 'fly')
-    bird.setTransform(startX, startY, 1, 1)
+    bird.setTransform(config.start.x, config.start.y, 1, 1)
     bird.framerate = 30
     createjs.Tween
             .get(bird, { loop: -1 })
-            .to({ y: startY + wiggleDelta }, 380, createjs.Ease.sineInOut)
-            .to({ y: startY }, 380, createjs.Ease.sineInOut)
+            .to({ y: config.start.y + config.wiggle }, 380, createjs.Ease.sineInOut)
+            .to({ y: config.start.y }, 380, createjs.Ease.sineInOut)
 
     return bird
   }
@@ -155,9 +182,9 @@ humhub.module('flappy-bird', (module, req, $) => {
   function createFill(isTop = true) {
     const graphic = new createjs.Graphics()
     const color = isTop ? '#70c5ce' : '#ded895'
-    const y = isTop ? 0 : dimensions.height
+    const y = isTop ? 0 : config.dimension.height
     graphic.beginFill(color)
-           .rect(0, y, dimensions.width, 0)
+           .rect(0, y, config.dimension.width, 0)
 
     return new createjs.Shape(graphic)
   }
@@ -176,30 +203,13 @@ humhub.module('flappy-bird', (module, req, $) => {
 
     stage.addChild(createFill(false))
 
-    counter = createText(false, '#000000', 1, '86px')
-    highScore = createText(false, '#000000', 0, '60px')
+    counter = createText(config.count, false, '#000000', 1, '86px')
+    highScore = createText(config.highScore, false, '#000000', 0, '60px')
     stage.addChild(counter)
 
     createjs.Ticker.timingMode = createjs.Ticker.RAF
     createjs.Ticker.interval = 100
     createjs.Ticker.addEventListener('tick', tick)
-
-    if (supports_html5_storage()) {
-      const storage = localStorage.getItem('highScore')
-      if (storage) {
-        highScore.text = storage
-      } else {
-        localStorage.setItem('highScore', '0')
-      }
-    } else {
-      const myCookie = document.cookie
-                               .replace(/(?:^|.*;\s*)highScore\s*=\s*([^;]*).*$|^.*$/, '$1')
-      if (myCookie) {
-        highScore.text = myCookie
-      } else {
-        document.cookie = 'highScore=0'
-      }
-    }
   }
 
   /**
@@ -220,41 +230,41 @@ humhub.module('flappy-bird', (module, req, $) => {
    */
   function spacebar() {
     handleJumpStart()
-    if (dead && restartable) {
+    if (config.isDead && config.restartable) {
       restart()
-      restartable = false
+      config.restartable = false
     }
     return false
   }
 
   function handleJumpStart() {
-    if (!dead) {
+    if (!config.isDead) {
       createjs.Tween.removeTweens(bird)
       bird.gotoAndPlay('fly')
       if (bird.y < -200) {
         bird.y = -200
       }
       if (bird.rotation < 0) {
-        rotationDelta = (-bird.rotation - 20) / 5
+        config.rotation = (-bird.rotation - 20) / 5
       } else {
-        rotationDelta = (bird.rotation + 20) / 5
+        config.rotation = (bird.rotation + 20) / 5
       }
       createjs.Tween
               .get(bird)
-              .to({ y: bird.y - rotationDelta, rotation: -20 }, rotationDelta, createjs.Ease.linear)
-              .to({ y: bird.y - jumpAmount, rotation: -20 }, jumpTime - rotationDelta, createjs.Ease.quadOut)
-              .to({ y: bird.y }, jumpTime, createjs.Ease.quadIn)
+              .to({ y: bird.y - config.rotation, rotation: -20 }, config.rotation, createjs.Ease.linear)
+              .to({ y: bird.y - config.jumpHeight, rotation: -20 }, config.jumpTime - config.rotation, createjs.Ease.quadOut)
+              .to({ y: bird.y }, config.jumpTime, createjs.Ease.quadIn)
               .to({ y: bird.y + 200, rotation: 90 }, (380) / 1.5, createjs.Ease.linear)
               .call(diveBird)
-              .to({ y: ground.y - 30 }, (dimensions.height - (bird.y + 200)) / 1.5, createjs.Ease.linear)
-      if (!started) {
-        token = undefined
+              .to({ y: ground.y - 30 }, (config.dimension.height - (bird.y + 200)) / 1.5, createjs.Ease.linear)
+      if (!config.isStarted) {
+        config.token = undefined
         getNewScore((tk) => {
-          token = tk
+          config.token = tk
           console.log(tk)
         })
-        started = true
-        counterShow = true
+        config.isStarted = true
+        config.counterShow = true
         bird.framerate = 60
       }
     }
@@ -273,48 +283,44 @@ humhub.module('flappy-bird', (module, req, $) => {
             .to({ y: start.y + 10 }, 50)
             .call(removeStart)
 
-    counter.text = `${count}`
+    counter.text = `${config.count}`
     counter.alpha = 0
     counter.font = '86px \'Flappy Bird\''
     counter.y = 150
-    counterShow = false
+    config.counterShow = false
 
     highScore.alpha = 0
-    pipeDelay = masterPipeDelay
-    dead = false
-    started = false
+    config.pipeDelay = masterPipeDelay
+    config.isDead = false
+    config.isStarted = false
     createjs.Tween.removeTweens(bird)
-    bird.x = startX
-    bird.y = startY
+    bird.x = config.start.x
+    bird.y = config.start.y
     bird.rotation = 0
-    rd = 0
+    config.rd = 0
     createjs.Tween
             .get(bird, { loop: -1 })
-            .to({ y: startY + wiggleDelta }, 380, createjs.Ease.sineInOut)
-            .to({ y: startY }, 380, createjs.Ease.sineInOut)
+            .to({ y: config.start.y + config.wiggle }, 380, createjs.Ease.sineInOut)
+            .to({ y: config.start.y }, 380, createjs.Ease.sineInOut)
   }
 
   function die() {
     $('canvas').trigger('gameEnd')
 
-    dead = true
+    config.isDead = true
     bird.gotoAndPlay('dive')
 
-    if (count > +highScore.text) {
-      highScore.text = counter.text
-      if (supports_html5_storage()) {
-        localStorage.setItem('highScore', `${count}`)
-      } else {
-        document.cookie = `highScore=${count}`
-      }
+    if (config.count > config.highScore) {
+      config.highScore = config.count
     }
+    highScore.text = config.highScore
     createjs.Tween.removeTweens(bird)
     createjs.Tween
             .get(bird)
             .wait(0)
             .to({ y: bird.y + 200, rotation: 90 }, (380) / 1.5, createjs.Ease.linear)
             .call(diveBird)
-            .to({ y: ground.y - 30 }, (dimensions.height - (bird.y + 200)) / 1.5, createjs.Ease.linear)
+            .to({ y: ground.y - 30 }, (config.dimension.height - (bird.y + 200)) / 1.5, createjs.Ease.linear)
     createjs.Tween
             .get(stage)
             .to({ alpha: 0 }, 100)
@@ -351,7 +357,7 @@ humhub.module('flappy-bird', (module, req, $) => {
     start.addEventListener('click', restart)
     share.addEventListener('click', goShare)
 //    leaderboard.addEventListener('click', function () { submitScore(token) })
-    restartable = true
+    config.restartable = true
   }
 
   /**
@@ -370,34 +376,31 @@ humhub.module('flappy-bird', (module, req, $) => {
    * @returns {createjs.Bitmap}
    */
   function addImageAtCenter(id, xOffset, yOffset) {
-    try {
-      const image = loader.getResult(id)
-      const bitmap = new createjs.Bitmap(image)
-      bitmap.alpha = 0
-      bitmap.x = dimensions.width / 2 - bitmap.image.width / 2 + xOffset
-      bitmap.y = dimensions.height / 2 - bitmap.image.height / 2 + yOffset
-      return bitmap
-    } catch (e) {
-      console.log(id)
-      console.error(e)
-    }
+    const image = loader.getResult(id)
+    const bitmap = new createjs.Bitmap(image)
+    bitmap.alpha = 0
+    bitmap.x = config.dimension.width / 2 - bitmap.image.width / 2 + xOffset
+    bitmap.y = config.dimension.height / 2 - bitmap.image.height / 2 + yOffset
+
+    return bitmap
   }
 
   /**
+   * @param {string} str
    * @param {boolean} isOutline
    * @param {string} color
    * @param {number} alpha
    * @param {string} fontSize
    * @returns {createjs.Text}
    */
-  function createText(isOutline, color, alpha, fontSize) {
-    const text = new createjs.Text('0', `${fontSize} 'Flappy Bird'`, color)
+  function createText(str, isOutline, color, alpha, fontSize) {
+    const text = new createjs.Text(str, `${fontSize} 'Flappy Bird'`, color)
     if (isOutline) {
       text.outline = 5
     }
     text.color = color
     text.textAlign = 'center'
-    text.x = dimensions.width / 2
+    text.x = config.dimension.width / 2
     text.y = 150
     text.alpha = alpha
     return text
@@ -407,13 +410,10 @@ humhub.module('flappy-bird', (module, req, $) => {
    * @todo Replace with humhub share
    */
   function goShare() {
-    let countText
-    if (counter.text === '1') {
-      countText = '1 point'
-    } else {
-      countText = counter.text + ' points'
-    }
-    window.open('http://twitter.com/share?url=http%3A%2F%2Fflappybird.io&text=I scored ' + countText + ' on HTML5 Flappy Bird.')
+    const countText = config.count === 1
+      ? '1 point'
+      : `${config.count} points`
+    const text = `I scored ${countText} on HTML5 Flappy Bird.`
   }
 
   /** @returns {boolean} */
@@ -434,7 +434,7 @@ humhub.module('flappy-bird', (module, req, $) => {
     const image = loader.getResult('pipe')
 
     const gap = 250
-    const x = dimensions.width + 600
+    const x = config.dimension.width + 600
     const y = (ground - gap * 2) * Math.random() + gap * 1.5
 
     const pipe1 = new createjs.Bitmap(image)
@@ -468,7 +468,7 @@ humhub.module('flappy-bird', (module, req, $) => {
     const l = pipes.numChildren
 
     if (bird.y > (ground.y - 40)) {
-      if (!dead) {
+      if (!config.isDead) {
         die()
       }
       if (bird.y > (ground.y - 30)) {
@@ -476,19 +476,19 @@ humhub.module('flappy-bird', (module, req, $) => {
       }
     }
 
-    if (!dead) {
+    if (!config.isDead) {
       ground.x = (ground.x - deltaS * 300) % ground.tileW
     }
 
-    if (started && !dead) {
-      rd = rd + deltaS
-      if (pipeDelay < 0) {
+    if (config.isStarted && !config.isDead) {
+      config.rd = config.rd + deltaS
+      if (config.pipeDelay < 0) {
         createPipePair(ground.y)
           .map(pipe => pipes.addChild(pipe))
 
-        pipeDelay = masterPipeDelay
+        config.pipeDelay = masterPipeDelay
       } else {
-        pipeDelay = pipeDelay - deltaS
+        config.pipeDelay -= deltaS
       }
 
       for (let i = 0; i < l; i++) {
@@ -502,16 +502,16 @@ humhub.module('flappy-bird', (module, req, $) => {
         pipe.x = (pipe.x - deltaS * 300)
         if (pipe.x <= 338 && pipe.rotation === 0 && pipe.name !== 'counted') {
           pipe.name = 'counted'
-          count += 1
-          counter.text = `${count}`
+          config.count += 1
+          counter.text = `${config.count}`
         }
         if (pipe.x + pipe.image.width <= -pipe.y) {
           pipes.removeChild(pipe)
         }
       }
-      if (counterShow) {
+      if (config.counterShow) {
         counter.alpha = 1
-        counterShow = false
+        config.counterShow = false
       }
     }
     stage.update(event)
