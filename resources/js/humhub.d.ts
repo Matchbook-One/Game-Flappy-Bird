@@ -2,24 +2,111 @@ import * as jQuery from 'jQuery'
 
 declare namespace humhub {
 
+  /**
+   * All log functions accept up to three arguments:
+   *
+   * @param {string} text The actual message (or text key)
+   * @param {any} details Details about the message this could be an js object an error or a client response object
+   * @param {boolean} setStatus A flag, which will trigger a global `humhub:modules:log:setStatus` event. This can be used to trigger the status bar for providing user feedback.
+   * @returns {void}
+   */
+  type LogFunction = (text: string, details: any, setStatus: boolean) => void
+
+  type EventFunction = {
+    (events: string, selector: string, handler: Function): void,
+    (events: string, handler: Function): void
+  }
+  type EventDataFunction = {
+    (event: string, handler: Function): void,
+    (event: string, data: object, handler: Function): void,
+    (event: string, selector: string, data: object, handler: Function): void
+  }
+
+  interface EventModule extends Module {
+    events: typeof jQuery
+    off: EventFunction
+    on: EventDataFunction
+    one: EventDataFunction
+    sub: (target: unknown) => unknown
+    trigger: (eventType: unknown, extraParameters: unknown) => unknown
+    triggerCondition: (target: unknown, event: unknown, extraParameters: unknown) => unknown
+  }
+
+  interface ClientModule extends Module {
+    Response: (xhr: unknown, url: string, textStatus: string, dataType: unknown) => unknown
+    actionPost: (evt: unknown) => unknown
+    ajax: (url: string, cfg: object, originalEvent: unknown) => unknown
+    back: () => unknown
+    config: {
+      baseUrl: string,
+      reloadableScripts: string[],
+      text: object
+    }
+    export: (exports: object) => unknown
+    get: (url: string, cfg, originalEvent) => unknown
+    html: (url: string, cfg, originalEvent) => unknown
+    id: string
+    init: (isPjax: boolean) => unknown
+    initOnPjaxLoad: boolean
+    isModule: boolean
+    json: (url: string, cfg: object, originalEvent: Event) => unknown
+    log: Logger
+    offBeforeLoad: () => unknown
+    onBeforeLoad: (form, msg, msgModal) => unknown
+    pjax: {
+      require: Require,
+      initOnPjaxLoad: boolean,
+      isModule: boolean,
+      id: string
+      config: object
+    }
+    post: (url: string, cfg: object, originalEvent?) => Promise<unknown>
+    redirect: (url) => unknown
+    reload: (preventPjax) => unknown
+    require: Require
+    sortOrder: number
+    submit: ($form, cfg, originalEvent) => unknown
+    text: (key: string) => string
+    unloadForm: ($form, msg) => unknown
+  }
 
   interface Module {
-    require: typeof Require
+    require: Require
     initOnPjaxLoad: boolean
     isModule: boolean
     id: string
     config: Record<string, any>
     text: (key: string) => string
-    export: (exports: Record<string, Function>) => void
+    export: (exports: Record<string, Function>) => void,
+    log: Logger
+  }
+
+  interface Logger {
+    trace: LogFunction,
+    debug: LogFunction,
+    info: LogFunction,
+    success: LogFunction,
+    warn: LogFunction,
+    error: LogFunction,
+    fatal: LogFunction
   }
 
   /**
-   *
    * @param {string} moduleId
    * @param {boolean} lazy
    * @returns {Module}
    */
-  export function Require(moduleId: string, lazy?: boolean): undefined | Module
+  type Require = {
+    (moduleNS: string, lazy?: boolean): Module,
+    (moduleNS: 'client', lazy?: boolean): ClientModule
+    (moduleNS: 'event', lazy?: boolean): EventModule
+    (moduleNS: 'gamecenter', lazy?: boolean): GameCenterModule
+  }
+
+  interface GameCenterModule extends Module {
+    id: 'humhub.modules.gamecenter'
+    submitScore: (moduleId: string, playerId: number, score) => Promise<unknown>
+  }
 
   /**
    * Adds a module to the humhub.modules namespace.
@@ -119,5 +206,5 @@ declare namespace humhub {
    *
    * @see https://docs.humhub.org/docs/develop/javascript-index#module-lifecycle
    */
-  export function module(id, moduleFunction: (module: Module, require: typeof Require, $: typeof jQuery) => void): void
+  type module = (id, moduleFunction: (module: Module, require: Require, $: typeof jQuery) => void) => void
 }

@@ -2,6 +2,7 @@
 
 namespace fhnw\modules\games\flappybird\assets;
 
+use fhnw\modules\gamecenter\assets\GameCenterAssets;
 use humhub\components\assets\AssetBundle;
 use yii\web\View;
 
@@ -16,6 +17,7 @@ class FlappyBirdAssets extends AssetBundle
    *                 Note that only a forward slash "/" should be used as directory separator.
    */
   public $css = ['css/flappy-bird.css'];
+
   /**
    * @var array $depends list of bundle class names that this bundle depends on.
    *                     For example:
@@ -26,7 +28,8 @@ class FlappyBirdAssets extends AssetBundle
    *                     ];
    *                     ```
    */
-  public $depends = [CreateJSAssets::class];
+  public $depends = [CreateJSAssets::class, GameCenterAssets::class];
+
   /**
    * @var array $js   list of JavaScript files that this bundle contains. Each JavaScript file can be specified in one of the following
    *                  formats:
@@ -47,11 +50,13 @@ class FlappyBirdAssets extends AssetBundle
    *                      This property will only have an affect if the publishOption is not already set explicitly.
    */
   public $jsPosition = View::POS_HEAD;
+
   /**
    * @var array $publishOptions change forceCopy to true when testing your js in order to rebuild this assets on every request (otherwise
    *                            they will be cached)
    */
   public $publishOptions = ['forceCopy' => true];
+  
   /**
    * @var string $sourcePath defines the path of your module assets
    * @inheritdoc

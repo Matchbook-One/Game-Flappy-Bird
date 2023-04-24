@@ -2,6 +2,7 @@
 
 namespace fhnw\modules\games\flappybird\controllers;
 
+use fhnw\modules\games\flappybird\FlappyBirdModule;
 use humhub\components\Controller;
 
 class IndexController extends Controller
@@ -13,7 +14,15 @@ class IndexController extends Controller
    */
   public function actionIndex(): string
   {
-    return $this->render('index');
+    $module = FlappyBirdModule::getInstance();
+    $highscore = $module->getGame()->getHighscore();
+
+    return $this->render(
+      'index', [
+               'assetUrl' => $module->getAssetsUrl(),
+               'score'    => $highscore ? $highscore->score : 0
+             ]
+    );
   }
 
 }
