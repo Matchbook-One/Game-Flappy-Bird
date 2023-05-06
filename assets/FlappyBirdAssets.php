@@ -28,7 +28,7 @@ class FlappyBirdAssets extends AssetBundle
    *                     ];
    *                     ```
    */
-  public $depends = [CreateJSAssets::class, GameCenterAssets::class];
+  public $depends = [GameCenterAssets::class];
 
   /**
    * @var array $js   list of JavaScript files that this bundle contains. Each JavaScript file can be specified in one of the following
@@ -43,7 +43,7 @@ class FlappyBirdAssets extends AssetBundle
    *                  This functionality is available since version 2.0.7.
    *                  Note that only a forward slash "/" should be used as directory separator.
    */
-  public $js = ['js/ndgmr.js', 'js/flappy-bird.js'];
+  public $js = ['https://code.createjs.com/1.0.0/createjs.js', 'js/ndgmr.js', 'js/flappy-bird.js'];
 
   /**
    * @var int $jsPosition can be used to set `$publishOptions['position']`.
@@ -56,7 +56,7 @@ class FlappyBirdAssets extends AssetBundle
    *                            they will be cached)
    */
   public $publishOptions = ['forceCopy' => true];
-  
+
   /**
    * @var string $sourcePath defines the path of your module assets
    * @inheritdoc

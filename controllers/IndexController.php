@@ -5,6 +5,9 @@ namespace fhnw\modules\games\flappybird\controllers;
 use fhnw\modules\games\flappybird\FlappyBirdModule;
 use humhub\components\Controller;
 
+/**
+ * @package FlappyBird/Controllers
+ */
 class IndexController extends Controller
 {
   /**

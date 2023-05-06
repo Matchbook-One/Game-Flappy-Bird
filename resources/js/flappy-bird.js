@@ -2,7 +2,7 @@
 humhub.module('flappy-bird', (module, requireModule, $) => {
 
   const event = requireModule('event')
-  const gamecenter = requireModule('gamecenter')
+  const gamecenter = new (requireModule('gamecenter'))()
 
   event.on('humhub:ready', () => {
     $('canvas').trigger('gameEnd')
@@ -16,8 +16,6 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
    * @typedef {object} Size
    * @property {number} width
    * @property {number} height
-   *
-
    */
 
   /** @type {number} */
@@ -175,6 +173,12 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
         config.isStarted = true
         config.counterShow = true
         bird.framerate = 60
+        gamecenter.startGame(module.id)
+                  .then((res) => console.log(res))
+                  .catch((e) => {
+                    console.error(e)
+                    module.log.error(e, undefined, true)
+                  })
       }
     }
   }
@@ -273,9 +277,10 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
     const countText = config.count === 1
       ? '1 point'
       : `${config.count} points`
-    const text = `I scored ${countText} on HTML5 Flappy Bird.`
-
-
+    const text = `I scored ${countText} in Flappy Bird.`
+    gamecenter.share(module.id, text)
+              .then(r => console.log('ok', r))
+              .catch(e => console.error(e))
   }
 
   /**
@@ -346,20 +351,14 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
   }
 
   function submitScore() {
-    gamecenter.submitScore(module.id, config.player, config.count)
+    gamecenter.endGame(module.id)
+    gamecenter.submitScore(module.id, config.count)
               .then((res) => console.log(res))
-              .catch(function (e) {
+              .catch((e) => {
                 console.error(e)
                 module.log.error(e, undefined, true)
               })
   }
-
-  module.export(
-    {
-      init
-    }
-  )
-
 
   function removeStart() {
     stage.removeChild(start)
@@ -518,4 +517,5 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
     return text
   }
 
+  module.export({ init })
 })
