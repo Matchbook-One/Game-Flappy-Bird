@@ -4,24 +4,23 @@
  * @author  Christian Seiler <christian@christianseiler.ch>
  */
 
-use fhnw\modules\games\flappybird\Events;
-use humhub\modules\admin\widgets\AdminMenu;
-use humhub\widgets\TopMenu;
+use fhnw\modules\games\flappybird\FlappyBirdModule;
 
 return [
   'id'        => 'flappy-bird',
-  'class'     => 'fhnw\modules\games\flappybird\FlappyBirdModule',
+  'class'     => FlappyBirdModule::class,
   'namespace' => 'fhnw\modules\games\flappybird',
   'events'    => [
+    /*
     [
       'class'    => TopMenu::class,
       'event'    => TopMenu::EVENT_INIT,
       'callback' => [Events::class, 'onTopMenuInit'],
-    ],
+    ]*//*,
     [
       'class'    => AdminMenu::class,
-      'event'    => TopMenu::EVENT_INIT,
+      'event'    => AdminMenu::EVENT_INIT,
       'callback' => [Events::class, 'onAdminMenuInit']
-    ]
+    ]*/
   ]
 ];

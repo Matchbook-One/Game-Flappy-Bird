@@ -9,6 +9,9 @@ insert_final_newline = true
 indent_style = space
 indent_size = 2
 trim_trailing_whitespace = true
+ij_any_align_multiline_chained_methods = true
+ij_any_align_multiline_parameters_in_calls = true
+ij_any_method_call_chain_wrap = on_every_item
 
 [*.php]
 ij_php_align_multiline_chained_methods = true
@@ -21,3 +24,7 @@ ij_php_comma_after_last_array_element = false
 ij_php_comma_after_last_closure_use_var = false
 ij_php_comma_after_last_match_arm = false
 ij_php_comma_after_last_parameter = false
+
+[*.js]
+ij_javascript_spaces_within_object_literal_braces = true
+ij_javascript_spaces_within_imports = true

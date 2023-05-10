@@ -14,9 +14,10 @@ use yii\helpers\Url;
 
 /**
  * @property-read string[] $contentContainerTypes
- * @property-read string   $configUrl
+ * @property-read string $configUrl
  * @phpstan-import-type GameConfig from GameModule
  * @phpstan-import-type AchievementConfig from GameModule
+ * @package FlappyBird
  */
 class FlappyBirdModule extends GameModule
 {
@@ -38,7 +39,7 @@ class FlappyBirdModule extends GameModule
    */
   public function getConfigUrl(): string
   {
-    return Url::to(['/flappybird/admin']);
+    return Url::to(['/flappy-bird/admin']);
   }
 
   /**
@@ -81,11 +82,20 @@ class FlappyBirdModule extends GameModule
    * @inheritdoc
    * @return GameConfig
    */
-  public function getGameConfig()
+  public function getGameConfig(): array
   {
     return [
       'title'       => 'Flappy Bird',
       'description' => 'The Game Flappy Bird'
     ];
+  }
+
+  /**
+   * @inheritdoc
+   * @return string
+   */
+  public function getGameUrl(): string
+  {
+    return Url::to(['/flappy-bird/index']);
   }
 }
