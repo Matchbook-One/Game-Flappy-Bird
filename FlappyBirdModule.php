@@ -7,9 +7,7 @@
 namespace fhnw\modules\games\flappybird;
 
 use fhnw\modules\gamecenter\components\GameModule;
-use humhub\modules\content\components\ContentContainerActiveRecord;
-use humhub\modules\user\models\User;
-use Yii;
+use fhnw\modules\gamecenter\models\Leaderboard;
 use yii\helpers\Url;
 
 /**
@@ -21,6 +19,7 @@ use yii\helpers\Url;
  */
 class FlappyBirdModule extends GameModule
 {
+
   /**
    * @phpstan-return AchievementConfig[]
    * @return array
@@ -28,7 +27,16 @@ class FlappyBirdModule extends GameModule
   public function getAchievementConfig(): array
   {
     return [
-      ['name' => 'first-game', 'title' => 'Win your first game', 'description' => 'Win your first game']
+      [
+        'name'        => 'first-game',
+        'title'       => 'Win your first game',
+        'description' => 'Win your first game'
+      ],
+      [
+        'name'        => 'week-streak',
+        'title'       => 'Play daily for a Week',
+        'description' => 'Play Flappy bird every day for 7 days in a row'
+      ]
     ];
   }
 
@@ -44,49 +52,14 @@ class FlappyBirdModule extends GameModule
 
   /**
    * @inheritdoc
-   *
-   * @param ContentContainerActiveRecord $container unused
-   *
-   * @return string
-   * @noinspection PhpMissingParentCallCommonInspection
-   */
-  public function getContentContainerDescription(ContentContainerActiveRecord $container): string
-  {
-    return Yii::t('FlappyBirdModule.base', 'description');
-  }
-
-  /**
-   * @inheritdoc
-   *
-   * @param ContentContainerActiveRecord $container unused
-   *
-   * @return string
-   * @noinspection PhpMissingParentCallCommonInspection
-   */
-  public function getContentContainerName(ContentContainerActiveRecord $container): string
-  {
-    return Yii::t('FlappyBirdModule.base', 'name');
-  }
-
-  /**
-   * @inheritdoc
-   * @return string[] valid content container classes
-   * @noinspection PhpMissingParentCallCommonInspection
-   */
-  public function getContentContainerTypes(): array
-  {
-    return [User::class];
-  }
-
-  /**
-   * @inheritdoc
    * @return GameConfig
    */
   public function getGameConfig(): array
   {
     return [
       'title'       => 'Flappy Bird',
-      'description' => 'The Game Flappy Bird'
+      'description' => 'The Game Flappy Bird',
+      'tags'        => ['platform', 'bird']
     ];
   }
 
@@ -98,4 +71,16 @@ class FlappyBirdModule extends GameModule
   {
     return Url::to(['/flappy-bird/index']);
   }
+
+  /**
+   * @return string[]
+   */
+  public function getLeaderBoardConfig(): array
+  {
+    return [
+      Leaderboard::CLASSIC,
+      Leaderboard::RECURRING_WEEKLY
+    ];
+  }
+
 }
