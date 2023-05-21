@@ -2,34 +2,14 @@
 
 namespace fhnw\modules\games\flappybird\assets;
 
-use fhnw\modules\gamecenter\assets\GameCenterAssets;
 use humhub\components\assets\AssetBundle;
 use yii\web\View;
 
 /**
  *
  */
-class FlappyBirdAssets extends AssetBundle
+class CreateJSAssets extends AssetBundle
 {
-
-  /**
-   * @var array $css list of CSS files that this bundle contains.
-   *                 Each CSS file can be specified in one of the three formats as explained in [[js]].
-   *                 Note that only a forward slash "/" should be used as directory separator.
-   */
-  public $css = ['css/flappy-bird.css'];
-
-  /**
-   * @var array $depends list of bundle class names that this bundle depends on.
-   *                     For example:
-   *                     ```php
-   *                     public $depends = [
-   *                     'yii\web\YiiAsset',
-   *                     'yii\bootstrap\BootstrapAsset',
-   *                     ];
-   *                     ```
-   */
-  public $depends = [GameCenterAssets::class, CreateJSAssets::class];
 
   /**
    * @var array $js list of JavaScript files that this bundle contains. Each JavaScript file can be specified in one of the following
@@ -44,24 +24,11 @@ class FlappyBirdAssets extends AssetBundle
    *                  This functionality is available since version 2.0.7.
    *                  Note that only a forward slash "/" should be used as directory separator.
    */
-  public $js = ['js/ndgmr.js', 'js/flappy-bird.js'];
-
+  public $js = ['https://code.createjs.com/1.0.0/createjs.js'];
   /**
    * @var int $jsPosition can be used to set `$publishOptions['position']`.
    *                      This property will only have an affect if the publishOption is not already set explicitly.
    */
   public $jsPosition = View::POS_HEAD;
-
-  /**
-   * @var array $publishOptions change forceCopy to true when testing your js in order to rebuild this assets on every request (otherwise
-   *                            they will be cached)
-   */
-  public $publishOptions = ['forceCopy' => true];
-
-  /**
-   * @var string $sourcePath defines the path of your module assets
-   * @inheritdoc
-   */
-  public $sourcePath = '@flappy-bird/resources';
 
 }

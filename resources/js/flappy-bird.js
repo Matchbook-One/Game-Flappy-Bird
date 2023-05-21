@@ -2,7 +2,10 @@
 humhub.module('flappy-bird', (module, requireModule, $) => {
 
   const event = requireModule('event')
-  const gamecenter = new (requireModule('gamecenter'))()
+  const gamecenter = (() => {
+    const gc = requireModule('gamecenter')
+    return new gc(module.id)
+  })()
 
   event.on('humhub:ready', () => {
     $('canvas').trigger('gameEnd')
@@ -45,7 +48,7 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
     count: 0,
     rotation: undefined,
     isStarted: false,
-    jumpHeight: 120,
+    jumpHeight: 100,
     jumpTime: 266,
     isDead: false,
     start: { x: undefined, y: undefined },
@@ -53,7 +56,8 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
     pipeDelay: masterPipeDelay,
     restartable: false,
     rd: 0,
-    counterShow: false
+    counterShow: false,
+    firstStart: true
   }
 
   /** @type {createjs.Stage} */
@@ -77,11 +81,17 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
   /** @type {createjs.Bitmap} */
   let score
 
+  /** @type {humhub.Achievement[]} */
+  let achievements
 
   /**
    *
    */
   function init() {
+    gamecenter.loadAchievements()
+              .then(res => achievements = res.achievements)
+    gamecenter.getHighScore()
+              .then(res => config.highscore = res.score.score)
     document.onkeydown = handleKeyDown
     /** @type {JQuery<HTMLCanvasElement>} */
     const canvas = $('#game')[0]
@@ -91,18 +101,18 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
     config.dimension.height = stage.canvas.height
     const manifest = [
       ...['bird', 'background', 'ground', 'pipe', 'start', 'score', 'share'].map(pngAsset)
-      /*,
-       { src: "fonts/FB.eot" },
-       { src: "fonts/FB.svg" },
-       { src: "fonts/FB.ttf" },
-       { src: "fonts/FB.woff" }*/
     ]
     loader = new createjs.LoadQueue(false)
     loader.addEventListener('complete', handleComplete)
+    loader.addEventListener('error', handleError)
     loader.loadManifest(manifest)
   }
 
-  function handleComplete() {
+  function handleError(error) {
+    console.log(error)
+  }
+
+  function handleComplete(o) {
     stage.addChild(createBackground())
     ground = createGround()
     bird = createBird()
@@ -158,7 +168,8 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
       }
       if (bird.rotation < 0) {
         config.rotation = (-bird.rotation - 20) / 5
-      } else {
+      }
+      else {
         config.rotation = (bird.rotation + 20) / 5
       }
       createjs.Tween
@@ -179,6 +190,11 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
                     console.error(e)
                     module.log.error(e, undefined, true)
                   })
+      }
+
+      if (config.firstStart) {
+        handleStreaks()
+        config.firstStart = false
       }
     }
   }
@@ -219,7 +235,7 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
 
   function die() {
     $('canvas').trigger('gameEnd')
-    submitScore()
+    submitScore(config.count)
 
     config.isDead = true
     bird.gotoAndPlay('dive')
@@ -275,8 +291,8 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
    */
   function goShare() {
     const countText = config.count === 1
-      ? '1 point'
-      : `${config.count} points`
+                      ? '1 point'
+                      : `${config.count} points`
     const text = `I scored ${countText} in Flappy Bird.`
     gamecenter.share(module.id, text)
               .then(r => console.log('ok', r))
@@ -320,7 +336,8 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
           .map(pipe => pipes.addChild(pipe))
 
         config.pipeDelay = masterPipeDelay
-      } else {
+      }
+      else {
         config.pipeDelay -= deltaS
       }
 
@@ -350,14 +367,50 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
     stage.update(event)
   }
 
-  function submitScore() {
-    gamecenter.endGame(module.id)
-    gamecenter.submitScore(module.id, config.count)
-              .then((res) => console.log(res))
+  function handleStreaks() {
+    const achievement = achievements.find(a => a.achievement === 'week-streak')
+    let date = new Date(achievement.lastUpdated)
+    const today = new Date().setHours(0, 0, 0, 0)
+    const diff = date - today
+    const day = 24 * 60 * 60 * 1000
+    if (diff > -day) {
+      // last update was yesterday
+      achievement.percentCompleted += 15
+    }
+    else if (diff < -day) {
+      // last update was before yesterday
+      achievement.percentCompleted = 0
+    }
+    else {
+      return
+    }
+    updateAchievement(achievement)
+  }
+
+  function submitScore(score) {
+    gamecenter.endGame()
+    gamecenter.submitScore(score)
+              .then((res) => module.log.info('submitScore success', res, false))
               .catch((e) => {
-                console.error(e)
                 module.log.error(e, undefined, true)
               })
+
+    /* handle Achievement */
+    const achievement = achievements.find(a => a.achievement === 'first-game')
+    if (achievement.percentCompleted < 100 && score >= 10) {
+      achievement.percentCompleted = 100
+      updateAchievement(achievement)
+    }
+  }
+
+  function updateAchievement(achievement) {
+    return gamecenter.updateAchievement(achievement)
+                     .then(r => {
+                       const achievement = r.achievement
+                       achievements.forEach((a, index, array) => {
+                         if (a.achievement === achievement.achievement) { array[index] = achievement }
+                       })
+                     })
   }
 
   function removeStart() {
@@ -463,7 +516,7 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
   function createPipePair(ground) {
     const image = loader.getResult('pipe')
 
-    const gap = 250
+    const gap = 300
     const x = config.dimension.width + 600
     const y = (ground - gap * 2) * Math.random() + gap * 1.5
 

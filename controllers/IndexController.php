@@ -10,6 +10,7 @@ use humhub\components\Controller;
  */
 class IndexController extends Controller
 {
+
   /**
    * Renders the index view for the module
    *
@@ -18,13 +19,10 @@ class IndexController extends Controller
   public function actionIndex(): string
   {
     $module = FlappyBirdModule::getInstance();
-    $highscore = $module->getGame()->getHighscore();
 
     return $this->render(
-      'index', [
-               'assetUrl' => $module->getAssetsUrl(),
-               'score'    => $highscore ? $highscore->score : 0
-             ]
+      'index',
+      ['assetUrl' => $module->getAssetsUrl()]
     );
   }
 
