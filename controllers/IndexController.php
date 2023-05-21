@@ -20,6 +20,7 @@ class IndexController extends Controller
   {
     $module = FlappyBirdModule::getInstance();
 
+
     return $this->render(
       'index',
       ['assetUrl' => $module->getAssetsUrl()]

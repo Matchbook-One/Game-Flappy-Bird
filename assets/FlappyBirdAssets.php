@@ -29,6 +29,7 @@ class FlappyBirdAssets extends AssetBundle
    *                     ];
    *                     ```
    */
+
   public $depends = [GameCenterAssets::class, CreateJSAssets::class];
 
   /**
@@ -44,7 +45,9 @@ class FlappyBirdAssets extends AssetBundle
    *                  This functionality is available since version 2.0.7.
    *                  Note that only a forward slash "/" should be used as directory separator.
    */
+
   public $js = ['js/ndgmr.js', 'js/flappy-bird.js'];
+
 
   /**
    * @var int $jsPosition can be used to set `$publishOptions['position']`.
