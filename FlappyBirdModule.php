@@ -30,12 +30,14 @@ class FlappyBirdModule extends GameModule
       [
         'name'        => 'first-game',
         'title'       => 'Win your first game',
-        'description' => 'Win your first game'
+        'description' => 'Win your first game',
+        'secret'      => true
       ],
       [
-        'name'        => 'week-streak',
-        'title'       => 'Play daily for a Week',
-        'description' => 'Play Flappy bird every day for 7 days in a row'
+        'name'          => 'week-streak',
+        'title'         => 'Play daily for a Week',
+        'description'   => 'Play Flappy bird every day for 7 days in a row',
+        'show_progress' => true
       ]
     ];
   }
