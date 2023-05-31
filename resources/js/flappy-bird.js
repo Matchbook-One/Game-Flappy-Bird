@@ -1,11 +1,9 @@
 /** @namespace humhub */
-humhub.module('flappy-bird', (module, requireModule, $) => {
+humhub.module('flappy-bird', (module, getModule, $) => {
 
-  const event = requireModule('event')
-  const gamecenter = (() => {
-    const gc = requireModule('gamecenter')
-    return new gc(module.id)
-  })()
+  const uiStatus = getModule('ui.status')
+  const event = getModule('event')
+  const gamecenter = getModule('gamecenter').shared(module.id)
 
   event.on('humhub:ready', () => {
     $('canvas').trigger('gameEnd')
@@ -81,7 +79,7 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
   /** @type {createjs.Bitmap} */
   let score
 
-  /** @type {humhub.Achievement[]} */
+  /** @type {Achievement[]} achievements */
   let achievements
 
   /**
@@ -91,7 +89,7 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
     gamecenter.loadAchievements()
               .then(res => achievements = res.achievements)
     gamecenter.getHighScore()
-              .then(res => config.highscore = res.score.score)
+              .then(res => config.highscore = res.highscore)
     document.onkeydown = handleKeyDown
     /** @type {JQuery<HTMLCanvasElement>} */
     const canvas = $('#game')[0]
@@ -184,7 +182,7 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
         config.isStarted = true
         config.counterShow = true
         bird.framerate = 60
-        gamecenter.startGame(module.id)
+        gamecenter.startGame()
                   .then((res) => console.log(res))
                   .catch((e) => {
                     console.error(e)
@@ -294,9 +292,14 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
                       ? '1 point'
                       : `${config.count} points`
     const text = `I scored ${countText} in Flappy Bird.`
-    gamecenter.share(module.id, text)
-              .then(r => console.log('ok', r))
-              .catch(e => console.error(e))
+    gamecenter.share(text)
+              .then(() => {
+                uiStatus.success('Share complete')
+              })
+              .catch((e) => {
+                uiStatus.error('Sharing failed', e)
+                module.log.error(module.id + '::share() not successful', e)
+              })
   }
 
   /**
@@ -369,20 +372,18 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
 
   function handleStreaks() {
     const achievement = achievements.find(a => a.achievement === 'week-streak')
-    let date = new Date(achievement.lastUpdated)
+    const date = new Date(achievement.lastUpdated)
     const today = new Date().setHours(0, 0, 0, 0)
-    const diff = date - today
+    const diff = today - date
     const day = 24 * 60 * 60 * 1000
-    if (diff > -day) {
-      // last update was yesterday
+    if (diff < 0) {
+      return
+    }
+    else if (diff < day) {
       achievement.percentCompleted += 15
     }
-    else if (diff < -day) {
-      // last update was before yesterday
-      achievement.percentCompleted = 0
-    }
     else {
-      return
+      achievement.percentCompleted = 15
     }
     updateAchievement(achievement)
   }
@@ -404,18 +405,19 @@ humhub.module('flappy-bird', (module, requireModule, $) => {
   }
 
   function updateAchievement(achievement) {
-    return gamecenter.updateAchievement(achievement)
-                     .then(r => {
-                       const achievement = r.achievement
-                       achievements.forEach((a, index, array) => {
-                         if (a.achievement === achievement.achievement) { array[index] = achievement }
-                       })
-                     })
+    gamecenter.updateAchievement(achievement)
+              .then(result => {
+                const achievement = result.achievement
+                achievements.forEach((a, index, array) => {
+                  if (a.achievement === achievement.achievement) { array[index] = achievement }
+                })
+              })
   }
 
   function removeStart() {
     stage.removeChild(start)
     stage.removeChild(share)
+
     stage.removeChild(score)
   }
 

@@ -12,5 +12,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="flappybird" level="project" />
+    <orderEntry type="library" name="GameCenter" level="project" />
   </component>
 </module>

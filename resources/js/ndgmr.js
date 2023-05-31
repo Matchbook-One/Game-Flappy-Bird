@@ -22,6 +22,7 @@
 /**
  * A Pixel Perfect Collision Detection for EaselJS Bitmap-Objects
  * @author olsn, indiegamr.com
+ * http://indiegamr.com/easeljs-pixel-perfect-collision-detection-for-bitmaps-with-alpha-threshold/
  **/
 
 this.ndgmr = this.ndgmr || {};
@@ -57,9 +58,9 @@ this.ndgmr = this.ndgmr || {};
     getRect = getRect || false
 
     let areObjectsCloseEnough,
-      intersetion,
-      imageData1, imageData2,
-      pixelIntersection
+        intersetion,
+        imageData1, imageData2,
+        pixelIntersection
 
     //this is currently not working correctly if one of the objects is rotated
     //calculating a bounding-box as precheck won't enhance performance here.
@@ -94,7 +95,8 @@ this.ndgmr = this.ndgmr || {};
       pixelIntersection.x2 += intersection.x
       pixelIntersection.y += intersection.y
       pixelIntersection.y2 += intersection.y
-    } else {
+    }
+    else {
       return false
     }
 
@@ -110,15 +112,15 @@ this.ndgmr = this.ndgmr || {};
     b2 = bitmap2.localToGlobal(0, 0)
 
     ir1 = bitmap1 instanceof createjs.Bitmap
-      ? { width: bitmap1.image.width, height: bitmap1.image.height }
-      : bitmap1.spriteSheet.getFrame(bitmap1.currentFrame).rect
+          ? { width: bitmap1.image.width, height: bitmap1.image.height }
+          : bitmap1.spriteSheet.getFrame(bitmap1.currentFrame).rect
     ir2 = bitmap2 instanceof createjs.Bitmap
-      ? { width: bitmap2.image.width, height: bitmap2.image.height }
-      : bitmap2.spriteSheet.getFrame(bitmap2.currentFrame).rect
+          ? { width: bitmap2.image.width, height: bitmap2.image.height }
+          : bitmap2.spriteSheet.getFrame(bitmap2.currentFrame).rect
 
     //precheck if objects are even close enough
     return (Math.abs(b2.x - b1.x) < ir2.width * bitmap2.scaleX + ir1.width * bitmap1.scaleX
-      && Math.abs(b2.y - b1.y) < ir2.height * bitmap2.scaleY + ir1.height * bitmap2.scaleY)
+            && Math.abs(b2.y - b1.y) < ir2.height * bitmap2.scaleY + ir1.height * bitmap2.scaleY)
   }
 
   var _intersectingImagePart = function (intersetion, bitmap, ctx, i) {
@@ -126,30 +128,35 @@ this.ndgmr = this.ndgmr || {};
 
     if (bitmap instanceof createjs.Bitmap) {
       image = bitmap.image
-    } else if (bitmap instanceof createjs.Sprite) {
+    }
+    else if (bitmap instanceof createjs.Sprite) {
       frame = bitmap.spriteSheet.getFrame(bitmap.currentFrame)
       frameName = frame.image.src + ':' +
-        frame.rect.x + ':' + frame.rect.y + ':' +
-        frame.rect.width + ':' + frame.rect.height// + ':' + frame.rect.regX  + ':' + frame.rect.regY
+                  frame.rect.x + ':' + frame.rect.y + ':' +
+                  frame.rect.width + ':' + frame.rect.height// + ':' + frame.rect.regX  + ':' + frame.rect.regY
       if (cachedBAFrames[frameName]) {
         image = cachedBAFrames[frameName]
-      } else {
+      }
+      else {
         cachedBAFrames[frameName] = image = createjs.SpriteSheetUtils.extractFrame(bitmap.spriteSheet, bitmap.currentFrame)
       }
-    } else if (bitmap instanceof createjs.MovieClip) {
+    }
+    else if (bitmap instanceof createjs.MovieClip) {
       let mBitmap
       if (bitmap.instance.instance != undefined) {
         mBitmap = bitmap.instance.instance
-      } else if (bitmap.instance != undefined) {
+      }
+      else if (bitmap.instance != undefined) {
         mBitmap = bitmap.instance
       }
       frame = mBitmap.spriteSheet.getFrame(mBitmap.currentFrame)
       frameName = frame.image.src + ':' +
-        frame.rect.x + ':' + frame.rect.y + ':' +
-        frame.rect.width + ':' + frame.rect.height// + ':' + frame.rect.regX  + ':' + frame.rect.regY
+                  frame.rect.x + ':' + frame.rect.y + ':' +
+                  frame.rect.width + ':' + frame.rect.height// + ':' + frame.rect.regX  + ':' + frame.rect.regY
       if (cachedBAFrames[frameName]) {
         image = cachedBAFrames[frameName]
-      } else {
+      }
+      else {
         cachedBAFrames[frameName] = image = createjs.SpriteSheetUtils.extractFrame(mBitmap.spriteSheet, mBitmap.currentFrame)
       }
     }
@@ -163,7 +170,8 @@ this.ndgmr = this.ndgmr || {};
     ctx.translate(-bl.x - intersetion['rect' + i].regX, -bl.y - intersetion['rect' + i].regY)
     if ((sr = bitmap.sourceRect) != undefined) {
       ctx.drawImage(image, sr.x, sr.y, sr.width, sr.height, 0, 0, sr.width, sr.height)
-    } else {
+    }
+    else {
       ctx.drawImage(image, 0, 0, image.width, image.height)
     }
     return ctx.getImageData(0, 0, intersetion.width, intersetion.height).data
@@ -171,7 +179,7 @@ this.ndgmr = this.ndgmr || {};
 
   var _compareAlphaValues = function (imageData1, imageData2, width, height, alphaThreshold, getRect) {
     let alpha1, alpha2, x, y, offset = 3,
-      pixelRect = { x: Infinity, y: Infinity, x2: -Infinity, y2: -Infinity }
+        pixelRect                    = { x: Infinity, y: Infinity, x2: -Infinity, y2: -Infinity }
 
     // parsing through the pixels checking for an alpha match
     // TODO: intelligent parsing, not just from 0 to end!
@@ -186,7 +194,8 @@ this.ndgmr = this.ndgmr || {};
             if (x > pixelRect.x2) pixelRect.x2 = x
             if (y < pixelRect.y) pixelRect.y = y
             if (y > pixelRect.y2) pixelRect.y2 = y
-          } else {
+          }
+          else {
             return { x: x, y: y, width: 1, height: 1 }
           }
         }
@@ -213,7 +222,8 @@ this.ndgmr = this.ndgmr || {};
       const pp = _getParentalCumulatedProperty(child.parent, propName, operation)
       if (operation == '*') {
         return cp * pp
-      } else {
+      }
+      else {
         return cp + pp
       }
     }
@@ -245,7 +255,8 @@ this.ndgmr = this.ndgmr || {};
         rect1: rect1,
         rect2: rect2
       }
-    } else {
+    }
+    else {
       return null
     }
   }
@@ -275,25 +286,29 @@ this.ndgmr = this.ndgmr || {};
       bounds.height = bounds.y2 - bounds.y
       delete bounds.x2
       delete bounds.y2
-    } else {
+    }
+    else {
       let gp, gp2, gp3, gp4, imgr = {}, sr
       if (obj instanceof createjs.Bitmap) {
         sr = obj.sourceRect || obj.image
 
         imgr.width = sr.width
         imgr.height = sr.height
-      } else if (obj instanceof createjs.Sprite) {
+      }
+      else if (obj instanceof createjs.Sprite) {
         if (obj.spriteSheet._frames && obj.spriteSheet._frames[obj.currentFrame] && obj.spriteSheet._frames[obj.currentFrame].image) {
           const cframe = obj.spriteSheet.getFrame(obj.currentFrame)
           imgr.width = cframe.rect.width
           imgr.height = cframe.rect.height
           imgr.regX = cframe.regX
           imgr.regY = cframe.regY
-        } else {
+        }
+        else {
           bounds.x = obj.x || 0
           bounds.y = obj.y || 0
         }
-      } else {
+      }
+      else {
         bounds.x = obj.x || 0
         bounds.y = obj.y || 0
       }

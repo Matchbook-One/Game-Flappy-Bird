@@ -1,15 +1,16 @@
 <?php
+/**
+ * https://www.yiiframework.com/doc/guide/2.0/en/structure-assets
+ */
 
 namespace fhnw\modules\games\flappybird\assets;
 
-use fhnw\modules\gamecenter\assets\GameCenterAssets;
-use humhub\components\assets\AssetBundle;
-use yii\web\View;
+use fhnw\modules\gamecenter\components\GameAssets;
 
 /**
  *
  */
-class FlappyBirdAssets extends AssetBundle
+class FlappyBirdAssets extends GameAssets
 {
 
   /**
@@ -30,10 +31,10 @@ class FlappyBirdAssets extends AssetBundle
    *                     ```
    */
 
-  public $depends = [GameCenterAssets::class, CreateJSAssets::class];
+  public $depends = [CreateJSAssets::class];
 
   /**
-   * @var array $js list of JavaScript files that this bundle contains. Each JavaScript file can be specified in one of the following
+   * @var array $js   list of JavaScript files that this bundle contains. Each JavaScript file can be specified in one of the following
    *                  formats:
    *                  - an absolute URL representing an external asset.
    *                  For example, `https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js`.
@@ -45,21 +46,7 @@ class FlappyBirdAssets extends AssetBundle
    *                  This functionality is available since version 2.0.7.
    *                  Note that only a forward slash "/" should be used as directory separator.
    */
-
-  public $js = ['js/ndgmr.js', 'js/flappy-bird.js'];
-
-
-  /**
-   * @var int $jsPosition can be used to set `$publishOptions['position']`.
-   *                      This property will only have an affect if the publishOption is not already set explicitly.
-   */
-  public $jsPosition = View::POS_HEAD;
-
-  /**
-   * @var array $publishOptions change forceCopy to true when testing your js in order to rebuild this assets on every request (otherwise
-   *                            they will be cached)
-   */
-  public $publishOptions = ['forceCopy' => true];
+  public $js = ['js/ndgmr.js', 'js/flappy-bird.ts'];
 
   /**
    * @var string $sourcePath defines the path of your module assets
